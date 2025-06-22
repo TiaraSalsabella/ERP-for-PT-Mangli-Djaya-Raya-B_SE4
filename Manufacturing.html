@@ -280,6 +280,24 @@
       font-style: italic;
       display: none;
     }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-green);
+      color: white;
+    }
+    .btn-primary:hover {
+      background-color: var(--dark-green);
+      transform: translateY(-2px);
+    }
   </style>
 </head>
 <body>
@@ -313,9 +331,9 @@
             <option value="all">All Work Centers</option>
             <option value="Assembly Line 1">Assembly Line 1</option>
             <option value="Assembly Line 2">Assembly Line 2</option>
-            <option value="Painting Station">Painting Station</option>
             <option value="Packaging">Packaging</option>
           </select>
+        <button class="btn btn-primary">New MO</button>
         </div>
       </div>
       
@@ -442,13 +460,13 @@
             </td>
           </tr>
           
-          <tr class="mo-row" data-mo="MO-2023-0787" data-status="delayed" data-workcenter="Painting Station">
+          <tr class="mo-row" data-mo="MO-2023-0787" data-status="delayed" data-workcenter="Packaging">
             <td>MO-2023-0787</td>
             <td>Burley</td>
             <td>250 kg</td>
             <td>15 Mar 2023</td>
             <td class="priority-high">18 Mar 2023</td>
-            <td><span class="work-center">Painting Station</span></td>
+            <td><span class="work-center">Packaging</span></td>
             <td>
               <div>45% completed</div>
               <div class="progress-container">
