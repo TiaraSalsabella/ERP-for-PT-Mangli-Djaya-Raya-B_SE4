@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventory Management | ERP System</title>
+  <style>
+    :root {
+      --primary-green: #2b8c3e;
+      --dark-green: #1f6e2d;
+      --light-green: #48bb78;
+      --lighter-green: #c6f6d5;
+      --bg-gray: #f0fff4;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg-gray);
+      color: #333;
+    }
+    .sidebar {
+      position: fixed;
+      width: 220px;
+      height: 100vh;
+      background-color: var(--primary-green);
+      padding: 20px;
+      color: #fff;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+    .sidebar h2 {
+      margin-bottom: 30px;
+      font-size: 1.5rem;
+      border-bottom: 2px solid rgba(255,255,255,0.2);
+      padding-bottom: 10px;
+    }
+    .sidebar a {
+      display: block;
+      margin: 15px 0;
+      color: #fff;
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+    .sidebar a:hover {
+      background-color: rgba(255,255,255,0.2);
+      transform: translateX(5px);
+    }
+    .sidebar a.active {
+      background-color: rgba(255,255,255,0.3);
+      font-weight: bold;
+    }
+    .main {
+      margin-left: 240px;
+      padding: 30px;
+      transition: all 0.3s ease;
+    }
+    .section {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+    }
+    .section:hover {
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .section h2 {
+      margin-top: 0;
+      color: var(--primary-green);
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    th {
+      background-color: var(--lighter-green);
+      color: var(--dark-green);
+      font-weight: 600;
+    }
+    tr:hover {
+      background-color: var(--lighter-green);
+    }
+    .status {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap; /* Ini penting */
+    }
+
+    .status-adequate {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .status-low {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+    .status-critical {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    .btn {
+      padding: 8px 16px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .btn-primary {
+      background-color: var(--primary-green);
+      color: white;
+    }
+    .btn-primary:hover {
+      background-color: var(--dark-green);
+      transform: translateY(-2px);
+    }
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 12px;
+    }
+    .search-filter {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .search-box {
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      width: 300px;
+    }
+    .filter-group {
+      display: flex;
+      gap: 10px;
+    }
+    .filter-select {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: white;
+    }
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      gap: 5px;
+    }
+    .page-item {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .page-item.active {
+      background-color: var(--primary-green);
+      color: white;
+      border-color: var(--primary-green);
+    }
+    .page-item:hover:not(.active) {
+      background-color: #f0f0f0;
+    }
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: bold;
+      background-color: var(--light-green);
+      color: white;
+    }
+    .location {
+      font-size: 12px;
+      color: #666;
+    }
+    .stock-level {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .stock-bar {
+      flex-grow: 1;
+      height: 8px;
+      background-color: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .stock-fill {
+      height: 100%;
+      background-color: var(--primary-green);
+    }
+    .card-grid {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      flex: 1;
+      min-width: 180px;
+      transition: all 0.3s ease;
+      border-top: 4px solid var(--primary-green);
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .card h3 {
+      margin: 0;
+      font-size: 14px;
+      color: #666;
+    }
+    .card p {
+      font-size: 24px;
+      font-weight: bold;
+      margin-top: 10px;
+      color: var(--primary-green);
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 25px;
+      border-radius: 10px;
+      width: 60%;
+      max-width: 700px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+      position: relative;
+    }
+    .close-btn {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 24px;
+      color: #aaa;
+      cursor: pointer;
+    }
+    .modal-header {
+      color: var(--primary-green);
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    .tab-container {
+      display: flex;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 20px;
+    }
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+    }
+    .tab.active {
+      border-bottom-color: var(--primary-green);
+      font-weight: bold;
+      color: var(--primary-green);
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h2>ERP System</h2>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="purchase-requests.html">Purchase Requests</a>
+    <a href="purchase-orders.html">Purchase Orders</a>
+    <a href="goods-receipt.html">Goods Receipt</a>
+    <a href="manufacturing.html">Manufacturing</a>
+    <a href="#" class="active">Inventory</a>
+    <!-- <a href="reports.html">Reports</a> -->
+  </div>
+
+  <div class="main">
+    <h1 style="color: var(--primary-green);">Inventory Management</h1>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>Total Items</h3>
+        <p>1,245</p>
+      </div>
+      <div class="card">
+        <h3>Total Value</h3>
+        <p>$245,780</p>
+      </div>
+      <div class="card">
+        <h3>Low Stock Items</h3>
+        <p>28</p>
+      </div>
+      <div class="card">
+        <h3>Critical Items</h3>
+        <p>5</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="tab-container">
+        <div class="tab active" onclick="switchTab('all-items')">All Items</div>
+        <div class="tab" onclick="switchTab('low-stock')">Low Stock</div>
+        <div class="tab" onclick="switchTab('movement')">Movement</div>
+      </div>
+
+      <div class="tab-content active" id="all-items-tab">
+        <div class="search-filter">
+          <input type="text" class="search-box" placeholder="Search item code, description...">
+          <div class="filter-group">
+            <select class="filter-select">
+              <option>All Categories</option>
+              <option>Raw Materials</option>
+              <option>Components</option>
+              <option>Finished Goods</option>
+              <option>Supplies</option>
+            </select>
+            <select class="filter-select">
+              <option>All Status</option>
+              <option>Adequate</option>
+              <option>Low Stock</option>
+              <option>Critical</option>
+            </select>
+            <button class="btn btn-primary" onclick="openNewItemModal()">New Item</button>
+          </div>
+        </div>
+        
+        <table>
+          <thead>
+            <tr>
+              <th>Item Code</th>
+              <th>Description</th>
+              <th>Category</th>
+              <th>Current Stock</th>
+              <th>Min Stock</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="openItemDetail('MAT-1001')">
+              <td>MAT-1001</td>
+              <td>Steel Plate 5mm</td>
+              <td>Raw Materials</td>
+              <td>
+                <div class="stock-level">
+                  <span>120</span>
+                  <div class="stock-bar">
+                    <div class="stock-fill" style="width: 75%"></div>
+                  </div>
+                </div>
+              </td>
+              <td>50</td>
+              <td class="location">A-12-05</td>
+              <td><span class="status status-adequate">Adequate</span></td>
+              <td>
+                <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); transferItem('MAT-1001')">Transfer</button>
+              </td>
+            </tr>
+            <tr onclick="openItemDetail('COMP-2045')">
+              <td>COMP-2045</td>
+              <td>Hydraulic Valve</td>
+              <td>Components</td>
+              <td>
+                <div class="stock-level">
+                  <span>8</span>
+                  <div class="stock-bar">
+                    <div class="stock-fill" style="width: 20%; background-color: #ffc107;"></div>
+                  </div>
+                </div>
+              </td>
+              <td>10</td>
+              <td class="location">B-08-12</td>
+              <td><span class="status status-low">Low Stock</span></td>
+              <td>
+                <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); reorderItem('COMP-2045')">Reorder</button>
+              </td>
+            </tr>
+            <tr onclick="openItemDetail('FG-5002')">
+              <td>FG-5002</td>
+              <td>Product A (Finished)</td>
+              <td>Finished Goods</td>
+              <td>
+                <div class="stock-level">
+                  <span>45</span>
+                  <div class="stock-bar">
+                    <div class="stock-fill" style="width: 60%"></div>
+                  </div>
+                </div>
+              </td>
+              <td>30</td>
+              <td class="location">C-03-08</td>
+              <td><span class="status status-adequate">Adequate</span></td>
+              <td>
+                <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); transferItem('FG-5002')">Transfer</button>
+              </td>
+            </tr>
+            <tr onclick="openItemDetail('MAT-1003')">
+              <td>MAT-1003</td>
+              <td>Rubber Gasket</td>
+              <td>Raw Materials</td>
+              <td>
+                <div class="stock-level">
+                  <span>2</span>
+                  <div class="stock-bar">
+                    <div class="stock-fill" style="width: 5%; background-color: #dc3545;"></div>
+                  </div>
+                </div>
+              </td>
+              <td>25</td>
+              <td class="location">A-12-07</td>
+              <td><span class="status status-critical">Critical</span></td>
+              <td>
+                <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); emergencyOrder('MAT-1003')">Emergency Order</button>
+              </td>
+            </tr>
+            <tr onclick="openItemDetail('SUPP-3008')">
+              <td>SUPP-3008</td>
+              <td>Packaging Boxes</td>
+              <td>Supplies</td>
+              <td>
+                <div class="stock-level">
+                  <span>320</span>
+                  <div class="stock-bar">
+                    <div class="stock-fill" style="width: 80%"></div>
+                  </div>
+                </div>
+              </td>
+              <td>100</td>
+              <td class="location">D-15-02</td>
+              <td><span class="status status-adequate">Adequate</span></td>
+              <td>
+                <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); transferItem('SUPP-3008')">Transfer</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div class="pagination">
+          <div class="page-item">&laquo;</div>
+          <div class="page-item active">1</div>
+          <div class="page-item">2</div>
+          <div class="page-item">3</div>
+          <div class="page-item">&raquo;</div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="low-stock-tab">
+        <h3>Low Stock Items</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Item Code</th>
+              <th>Description</th>
+              <th>Current Stock</th>
+              <th>Min Stock</th>
+              <th>Reorder Qty</th>
+              <th>Lead Time</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>COMP-2045</td>
+              <td>Hydraulic Valve</td>
+              <td>8</td>
+              <td>10</td>
+              <td>25</td>
+              <td>7 days</td>
+              <td>
+                <button class="btn btn-primary btn-sm">Reorder</button>
+              </td>
+            </tr>
+            <tr>
+              <td>MAT-1003</td>
+              <td>Rubber Gasket</td>
+              <td>2</td>
+              <td>25</td>
+              <td>100</td>
+              <td>14 days</td>
+              <td>
+                <button class="btn btn-primary btn-sm">Emergency Order</button>
+              </td>
+            </tr>
+            <tr>
+              <td>ELEC-5012</td>
+              <td>Circuit Board</td>
+              <td>5</td>
+              <td>15</td>
+              <td>50</td>
+              <td>10 days</td>
+              <td>
+                <button class="btn btn-primary btn-sm">Reorder</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tab-content" id="movement-tab">
+        <h3>Inventory Movement</h3>
+        <canvas id="movementChart"></canvas>
+      </div>
+    </div>
+
+  <!-- Modal for Item Detail -->
+  <div id="itemDetailModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal()">&times;</span>
+      <div class="modal-header">
+        <h2 id="itemDetailTitle">Item Detail</h2>
+      </div>
+      <div id="itemDetailContent">
+        <!-- Content will be loaded dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for New Item -->
+  <div id="newItemModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal()">&times;</span>
+      <div class="modal-header">
+        <h2>Add New Inventory Item</h2>
+      </div>
+      <form id="newItemForm">
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 600;">Item Code</label>
+          <input type="text" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 600;">Description</label>
+          <input type="text" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 600;">Category</label>
+          <select style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+            <option>Raw Materials</option>
+            <option>Components</option>
+            <option>Finished Goods</option>
+            <option>Supplies</option>
+          </select>
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 600;">Initial Quantity</label>
+          <input type="number" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 600;">Min Stock Level</label>
+          <input type="number" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 600;">Location</label>
+          <input type="text" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Add Item</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    // Initialize charts
+    const movementCtx = document.getElementById('movementChart').getContext('2d');
+    const movementChart = new Chart(movementCtx, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [
+          {
+            label: 'Received',
+            data: [120, 150, 180, 90, 110, 130],
+            borderColor: '#2b8c3e',
+            backgroundColor: 'rgba(43, 140, 62, 0.1)',
+            fill: true,
+            tension: 0.3
+          },
+          {
+            label: 'Issued',
+            data: [80, 110, 150, 120, 100, 140],
+            borderColor: '#d4edda',
+            backgroundColor: 'rgba(212, 237, 218, 0.1)',
+            fill: true,
+            tension: 0.3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          tooltip: { 
+            enabled: true,
+            backgroundColor: '#2b8c3e'
+          },
+          legend: { 
+            position: 'top'
+          }
+        }
+      }
+    });
+
+    const valuationCtx = document.getElementById('valuationChart').getContext('2d');
+    const valuationChart = new Chart(valuationCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Raw Materials', 'Components', 'Finished Goods', 'Supplies'],
+        datasets: [{
+          data: [85000, 65000, 75000, 20780],
+          backgroundColor: [
+            '#2b8c3e',
+            '#48bb78',
+            '#c6f6d5',
+            '#e2e8f0'
+          ],
+          hoverBackgroundColor: [
+            '#1f6e2d',
+            '#38a169',
+            '#9ae6b4',
+            '#cbd5e0'
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          tooltip: { 
+            enabled: true,
+            backgroundColor: '#2b8c3e'
+          },
+          legend: {
+            position: 'right'
+          }
+        }
+      }
+    });
+
+    // Tab switching functionality
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      
+      document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
+      document.getElementById(`${tabId}-tab`).classList.add('active');
+    }
+
+    // Modal functions
+    function openItemDetail(itemCode) {
+      document.getElementById('itemDetailTitle').textContent = `Item ${itemCode} Details`;
+      
+      // Sample data - in a real app this would come from an API
+      const itemData = {
+        'MAT-1001': {
+          description: 'Steel Plate 5mm',
+          category: 'Raw Materials',
+          currentStock: 120,
+          minStock: 50,
+          location: 'A-12-05',
+          uom: 'Pieces',
+          value: '$24.50/unit',
+          lastReceived: '15 Mar 2023',
+          lastIssued: '18 Mar 2023'
+        },
+        'COMP-2045': {
+          description: 'Hydraulic Valve',
+          category: 'Components',
+          currentStock: 8,
+          minStock: 10,
+          location: 'B-08-12',
+          uom: 'Pieces',
+          value: '$125.00/unit',
+          lastReceived: '10 Mar 2023',
+          lastIssued: '17 Mar 2023'
+        },
+        'FG-5002': {
+          description: 'Product A (Finished)',
+          category: 'Finished Goods',
+          currentStock: 45,
+          minStock: 30,
+          location: 'C-03-08',
+          uom: 'Units',
+          value: '$350.00/unit',
+          lastReceived: '14 Mar 2023',
+          lastIssued: '19 Mar 2023'
+        },
+        'MAT-1003': {
+          description: 'Rubber Gasket',
+          category: 'Raw Materials',
+          currentStock: 2,
+          minStock: 25,
+          location: 'A-12-07',
+          uom: 'Pieces',
+          value: '$3.20/unit',
+          lastReceived: '5 Mar 2023',
+          lastIssued: '16 Mar 2023'
+        },
+        'SUPP-3008': {
+          description: 'Packaging Boxes',
+          category: 'Supplies',
+          currentStock: 320,
+          minStock: 100,
+          location: 'D-15-02',
+          uom: 'Pieces',
+          value: '$2.50/unit',
+          lastReceived: '12 Mar 2023',
+          lastIssued: '18 Mar 2023'
+        }
+      };
+      
+      const item = itemData[itemCode] || itemData['MAT-1001'];
+      
+      document.getElementById('itemDetailContent').innerHTML = `
+        <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+          <div style="flex: 1;">
+            <h3 style="color: var(--primary-green); margin-top: 0;">Basic Information</h3>
+            <p><strong>Description:</strong> ${item.description}</p>
+            <p><strong>Category:</strong> ${item.category}</p>
+            <p><strong>UOM:</strong> ${item.uom}</p>
+            <p><strong>Location:</strong> ${item.location}</p>
+          </div>
+          <div style="flex: 1;">
+            <h3 style="color: var(--primary-green); margin-top: 0;">Stock Information</h3>
+            <p><strong>Current Stock:</strong> ${item.currentStock}</p>
+            <p><strong>Min Stock Level:</strong> ${item.minStock}</p>
+            <p><strong>Value:</strong> ${item.value}</p>
+            <p><strong>Status:</strong> ${item.currentStock > item.minStock * 1.2 ? 
+              '<span class="status status-adequate">Adequate</span>' : 
+              item.currentStock > item.minStock ? 
+              '<span class="status status-low">Low Stock</span>' : 
+              '<span class="status status-critical">Critical</span>'}</p>
+          </div>
+        </div>
+        <div style="margin-bottom: 20px;">
+          <h3 style="color: var(--primary-green);">Recent Activity</h3>
+          <p><strong>Last Received:</strong> ${item.lastReceived} (50 units)</p>
+          <p><strong>Last Issued:</strong> ${item.lastIssued} (25 units)</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-primary">Transfer</button>
+          <button class="btn btn-primary">Adjust Stock</button>
+          <button class="btn btn-primary">View History</button>
+        </div>
+      `;
+      
+      document.getElementById('itemDetailModal').style.display = 'block';
+    }
+
+    function openNewItemModal() {
+      document.getElementById('newItemModal').style.display = 'block';
+    }
+
+    function closeModal() {
+      document.getElementById('itemDetailModal').style.display = 'none';
+      document.getElementById('newItemModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      if (event.target.className === 'modal') {
+        closeModal();
+      }
+    }
+
+    // Inventory Actions
+    function transferItem(itemCode) {
+      alert(`Initiating transfer for item ${itemCode}`);
+      // In a real app, this would open a transfer form
+    }
+
+    function reorderItem(itemCode) {
+      if (confirm(`Create purchase request for ${itemCode}?`)) {
+        alert(`Purchase request created for ${itemCode}`);
+        // In a real app, this would create a PR in the system
+      }
+    }
+
+    function emergencyOrder(itemCode) {
+      alert(`Creating emergency order for ${itemCode}`);
+      // In a real app, this would create a high-priority PR
+    }
+
+    // Form submission
+    document.getElementById('newItemForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      alert('New inventory item added successfully!');
+      closeModal();
+      // In a real app, this would submit the form data to the server
+    });
+
+    // Search functionality
+    document.querySelector('.search-box').addEventListener('input', function(e) {
+      const searchTerm = e.target.value.toLowerCase();
+      document.querySelectorAll('tbody tr').forEach(row => {
+        const rowText = row.textContent.toLowerCase();
+        row.style.display = rowText.includes(searchTerm) ? '' : 'none';
+      });
+    });
+
+    // Filter functionality
+    document.querySelectorAll('.filter-select').forEach(select => {
+      select.addEventListener('change', function() {
+        const categoryFilter = document.querySelectorAll('.filter-select')[0].value;
+        const statusFilter = document.querySelectorAll('.filter-select')[1].value;
+        
+        document.querySelectorAll('tbody tr').forEach(row => {
+          const category = row.cells[2].textContent;
+          const status = row.querySelector('.status').textContent;
+          
+          const categoryMatch = categoryFilter === 'All Categories' || category === categoryFilter;
+          const statusMatch = statusFilter === 'All Status' || status === statusFilter;
+          
+          row.style.display = categoryMatch && statusMatch ? '' : 'none';
+        });
+      });
+    });
+
+    // Pagination functionality
+    document.querySelectorAll('.page-item').forEach(item => {
+      item.addEventListener('click', function(e) {
+        if (e.target.textContent === '»') {
+          alert('Loading next page...');
+        } else if (e.target.textContent === '«') {
+          alert('Loading previous page...');
+        } else {
+          document.querySelectorAll('.page-item').forEach(i => {
+            i.classList.remove('active');
+          });
+          e.target.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

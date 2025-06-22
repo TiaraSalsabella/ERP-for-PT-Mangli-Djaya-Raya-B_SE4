@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goods Receipt | ERP System</title>
+  <style>
+    :root {
+      --primary-green: #2b8c3e;
+      --dark-green: #1f6e2d;
+      --light-green: #48bb78;
+      --lighter-green: #c6f6d5;
+      --bg-gray: #f0fff4;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg-gray);
+      color: #333;
+    }
+    .sidebar {
+      position: fixed;
+      width: 220px;
+      height: 100vh;
+      background-color: var(--primary-green);
+      padding: 20px;
+      color: #fff;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+    .sidebar h2 {
+      margin-bottom: 30px;
+      font-size: 1.5rem;
+      border-bottom: 2px solid rgba(255,255,255,0.2);
+      padding-bottom: 10px;
+    }
+    .sidebar a {
+      display: block;
+      margin: 15px 0;
+      color: #fff;
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+    .sidebar a:hover {
+      background-color: rgba(255,255,255,0.2);
+      transform: translateX(5px);
+    }
+    .sidebar a.active {
+      background-color: rgba(255,255,255,0.3);
+      font-weight: bold;
+    }
+    .main {
+      margin-left: 240px;
+      padding: 30px;
+      transition: all 0.3s ease;
+    }
+    .section {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+    }
+    .section:hover {
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .section h2 {
+      margin-top: 0;
+      color: var(--primary-green);
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    th {
+      background-color: var(--lighter-green);
+      color: var(--dark-green);
+      font-weight: 600;
+    }
+    tr:hover {
+      background-color: var(--lighter-green);
+    }
+    .status {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .status-pending {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+    .status-partial {
+      background-color: #ffeeba;
+      color: #856404;
+    }
+    .status-completed {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .search-filter {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .search-box {
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      width: 300px;
+    }
+    .filter-group {
+      display: flex;
+      gap: 10px;
+    }
+    .filter-select {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: white;
+    }
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      gap: 5px;
+    }
+    .page-item {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .page-item.active {
+      background-color: var(--primary-green);
+      color: white;
+      border-color: var(--primary-green);
+    }
+    .page-item:hover:not(.active) {
+      background-color: #f0f0f0;
+    }
+    .progress-container {
+      width: 100%;
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      margin-top: 5px;
+    }
+    .progress-bar {
+      height: 8px;
+      border-radius: 5px;
+      background-color: var(--primary-green);
+    }
+    .item-details {
+      display: none;
+      background-color: #f9f9f9;
+      padding: 15px;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+    .item-details table {
+      width: 100%;
+      margin-top: 10px;
+    }
+    .item-details th {
+      background-color: #e0e0e0;
+      color: #333;
+    }
+    .card-grid {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      flex: 1;
+      min-width: 180px;
+      transition: all 0.3s ease;
+      border-top: 4px solid var(--primary-green);
+    }
+    .card h3 {
+      margin: 0;
+      font-size: 14px;
+      color: #666;
+    }
+    .card p {
+      font-size: 24px;
+      font-weight: bold;
+      margin-top: 10px;
+      color: var(--primary-green);
+    }
+    .pr-detail {
+      display: none;
+      background-color: #f9f9f9;
+    }
+    
+    .pr-detail.active {
+      display: table-row;
+    }
+    
+    .detail-content {
+      padding: 15px;
+    }
+    
+    .detail-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    
+    .detail-table th, .detail-table td {
+      padding: 8px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    
+    .detail-table th {
+      background-color: #f2f2f2;
+    }
+    
+    .po-row {
+      cursor: pointer;
+    }
+    
+    .po-row:hover {
+      background-color: #f5f5f5;
+    }
+    .no-results {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+      font-style: italic;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h2>ERP Dashboard</h2>
+    <a href="/Dashboard.html">Dashboard</a>
+    <a href="/Purchase Requests Page.html">Purchase Requests</a>
+    <a href="/Purchase Orders.html">Purchase Orders</a>
+    <a href="#" class="active">Goods Receipt</a>
+    <a href="/Manufacturing.html">Manufacturing</a>
+    <a href="/Inventory.html">Inventory</a>
+    <a href="/Reports.html">Reports</a>
+  </div>
+
+  <div class="main">
+    <h1 style="color: var(--primary-green);">Goods Receipt</h1>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>Pending Receipts</h3>
+        <p>2</p>
+      </div>
+      <div class="card">
+        <h3>Completed Today</h3>
+        <p>3</p>
+      </div>
+      <div class="card">
+        <h3>Partial Receipts</h3>
+        <p>2</p>
+      </div>
+      <div class="card">
+        <h3>Items Received</h3>
+        <p>18</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="search-filter">
+        <input type="text" class="search-box" id="searchInput" placeholder="Search GR number, PO number...">
+        <div class="filter-group">
+          <select class="filter-select" id="statusFilter">
+            <option value="all">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="partial">Partial</option>
+            <option value="completed">Completed</option>
+          </select>
+          <select class="filter-select" id="vendorFilter">
+            <option value="all">All Vendors</option>
+            <option value="Klompongan (KLP)">Klompongan (KLP)</option>
+            <option value="Nangkaan (NGK)">Nangkaan (NGK)</option>
+            <option value="Etek (ETK)">Etek (ETK)</option>
+            <option value="Congkrong (CKG)">Congkrong (CKG)</option>
+          </select>
+        </div>
+      </div>
+      
+      <table id="grTable">
+        <thead>
+          <tr>
+            <th>GR Number</th>
+            <th>Date</th>
+            <th>PO Reference</th>
+            <th>Vendor</th>
+            <th>Items Received</th>
+            <th>Warehouse</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="grTableBody">
+          <tr class="po-row" data-gr="GR-2023-0456" data-status="partial" data-vendor="Klompongan (KLP)">
+            <td>GR-2023-0456</td>
+            <td>18 Mar 2023</td>
+            <td>PO-2023-1024</td>
+            <td>Klompongan (KLP)</td>
+            <td>3/5</td>
+            <td>Main Warehouse</td>
+            <td><span class="status status-partial">Partial</span></td>
+          </tr>
+          <tr class="po-detail" data-gr="GR-2023-0456">
+            <td colspan="7">
+              <div class="detail-content">
+                <h4>GR Details - GR-2023-0456</h4>
+                <table class="detail-table">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Quantity</th>
+                      <th>Unit</th>
+                      <th>Received</th>
+                      <th>Location</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Rajangan</td>
+                      <td>50</td>
+                      <td>kg</td>
+                      <td>50</td>
+                      <td>A-12-05</td>
+                    </tr>
+                    <tr>
+                      <td>Flue Cured Virginia</td>
+                      <td>30</td>
+                      <td>kg</td>
+                      <td>30</td>
+                      <td>B-08-12</td>
+                    </tr>
+                    <tr>
+                      <td>Dark Air Cured</td>
+                      <td>12</td>
+                      <td>kg</td>
+                      <td>12</td>
+                      <td>C-03-08</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+          
+          <tr class="po-row" data-gr="GR-2023-0455" data-status="completed" data-vendor="Nangkaan (NGK)">
+            <td>GR-2023-0455</td>
+            <td>17 Mar 2023</td>
+            <td>PO-2023-1023</td>
+            <td>Nangkaan (NGK)</td>
+            <td>8/8</td>
+            <td>Production Storage</td>
+            <td><span class="status status-completed">Completed</span></td>
+          </tr>
+          <tr class="po-detail" data-gr="GR-2023-0455">
+            <td colspan="7">
+              <div class="detail-content">
+                <h4>GR Details - GR-2023-0455</h4>
+                <table class="detail-table">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Quantity</th>
+                      <th>Unit</th>
+                      <th>Received</th>
+                      <th>Location</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Dark Fired Cured</td>
+                      <td>120</td>
+                      <td>kg</td>
+                      <td>120</td>
+                      <td>D-15-02</td>
+                    </tr>
+                    <tr>
+                      <td>Flue Cured Virginia</td>
+                      <td>90</td>
+                      <td>kg</td>
+                      <td>90</td>
+                      <td>D-15-03</td>
+                    </tr>
+                    <tr>
+                      <td>Rajangan</td>
+                      <td>150</td>
+                      <td>kg</td>
+                      <td>150</td>
+                      <td>D-15-04</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+          
+          <tr class="po-row" data-gr="GR-2023-0454" data-status="pending" data-vendor="Etek (ETK)">
+            <td>GR-2023-0454</td>
+            <td>16 Mar 2023</td>
+            <td>PO-2023-1022</td>
+            <td>Etek (ETK)</td>
+            <td>0/3</td>
+            <td>Main Warehouse</td>
+            <td><span class="status status-pending">Pending</span></td>
+          </tr>
+          <tr class="po-detail" data-gr="GR-2023-0454">
+            <td colspan="7">
+              <div class="detail-content">
+                <h4>GR Details - GR-2023-0454</h4>
+                <table class="detail-table">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Quantity</th>
+                      <th>Unit</th>
+                      <th>Received</th>
+                      <th>Location</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Rajangan</td>
+                      <td>80</td>
+                      <td>kg</td>
+                      <td>0</td>
+                      <td>-</td>
+                    </tr>
+                    <tr>
+                      <td>Sun Cured</td>
+                      <td>60</td>
+                      <td>kg</td>
+                      <td>0</td>
+                      <td>-</td>
+                    </tr>
+                    <tr>
+                      <td>Dark Air Cured</td>
+                      <td>30</td>
+                      <td>kg</td>
+                      <td>0</td>
+                      <td>-</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+          
+          <tr class="po-row" data-gr="GR-2023-0453" data-status="partial" data-vendor="Congkrong (CKG)">
+            <td>GR-2023-0453</td>
+            <td>15 Mar 2023</td>
+            <td>PO-2023-1021</td>
+            <td>Congkrong (CKG)</td>
+            <td>1/2</td>
+            <td>Finished Goods</td>
+            <td><span class="status status-partial">Partial</span></td>
+          </tr>
+          <tr class="po-detail" data-gr="GR-2023-0453">
+            <td colspan="7">
+              <div class="detail-content">
+                <h4>GR Details - GR-2023-0453</h4>
+                <table class="detail-table">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Quantity</th>
+                      <th>Unit</th>
+                      <th>Received</th>
+                      <th>Location</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Burley</td>
+                      <td>50</td>
+                      <td>kg</td>
+                      <td>50</td>
+                      <td>E-10-01</td>
+                    </tr>
+                    <tr>
+                      <td>Flue Cured Virginia</td>
+                      <td>30</td>
+                      <td>kg</td>
+                      <td>0</td>
+                      <td>-</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+          
+          <tr class="po-row" data-gr="GR-2023-0452" data-status="completed" data-vendor="Klompongan (KLP)">
+            <td>GR-2023-0452</td>
+            <td>14 Mar 2023</td>
+            <td>PO-2023-1020</td>
+            <td>Klompongan (KLP)</td>
+            <td>6/6</td>
+            <td>Main Warehouse</td>
+            <td><span class="status status-completed">Completed</span></td>
+          </tr>
+          <tr class="po-detail" data-gr="GR-2023-0452">
+            <td colspan="7">
+              <div class="detail-content">
+                <h4>GR Details - GR-2023-0452</h4>
+                <table class="detail-table">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Quantity</th>
+                      <th>Unit</th>
+                      <th>Received</th>
+                      <th>Location</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Rajangan</td>
+                      <td>100</td>
+                      <td>kg</td>
+                      <td>100</td>
+                      <td>F-05-10</td>
+                    </tr>
+                    <tr>
+                      <td>Sun Cured</td>
+                      <td>80</td>
+                      <td>kg</td>
+                      <td>80</td>
+                      <td>F-05-11</td>
+                    </tr>
+                    <tr>
+                      <td>Burley</td>
+                      <td>70</td>
+                      <td>kg</td>
+                      <td>70</td>
+                      <td>F-05-12</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div id="noResults" class="no-results">
+        No goods receipts match your filter criteria.
+      </div>
+      
+      <div class="pagination">
+        <div class="page-item">&laquo;</div>
+        <div class="page-item active">1</div>
+        <div class="page-item">2</div>
+        <div class="page-item">3</div>
+        <div class="page-item">&raquo;</div>
+      </div>
+    </div>
+
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const poRows = document.querySelectorAll('.po-row');
+      const poDetails = document.querySelectorAll('.po-detail');
+      const statusFilter = document.getElementById('statusFilter');
+      const vendorFilter = document.getElementById('vendorFilter');
+      const searchInput = document.getElementById('searchInput');
+      const noResults = document.getElementById('noResults');
+      
+      // Initialize all details as hidden
+      poDetails.forEach(detail => {
+        detail.style.display = 'none';
+      });
+      
+      // Row click handler for toggling details
+      poRows.forEach(row => {
+        row.addEventListener('click', function() {
+          const poNumber = this.getAttribute('data-gr');
+          const detailRow = document.querySelector(`.po-detail[data-gr="${poNumber}"]`);
+          
+          // Toggle the detail row
+          if (detailRow.style.display === 'none') {
+            detailRow.style.display = 'table-row';
+            // Close other open details
+            poDetails.forEach(d => {
+              if (d !== detailRow && d.style.display !== 'none') {
+                d.style.display = 'none';
+              }
+            });
+          } else {
+            detailRow.style.display = 'none';
+          }
+        });
+      });
+      
+      // Filter change handlers
+      statusFilter.addEventListener('change', applyFilters);
+      vendorFilter.addEventListener('change', applyFilters);
+      searchInput.addEventListener('input', applyFilters);
+      
+      function applyFilters() {
+        const statusValue = statusFilter.value;
+        const vendorValue = vendorFilter.value;
+        const searchValue = searchInput.value.toLowerCase();
+        
+        let visibleRows = 0;
+        
+        poRows.forEach(row => {
+          const rowStatus = row.getAttribute('data-status');
+          const rowVendor = row.getAttribute('data-vendor');
+          const rowText = row.textContent.toLowerCase();
+          
+          const statusMatch = statusValue === 'all' || rowStatus === statusValue;
+          const vendorMatch = vendorValue === 'all' || rowVendor === vendorValue;
+          const searchMatch = searchValue === '' || rowText.includes(searchValue);
+          
+          if (statusMatch && vendorMatch && searchMatch) {
+            row.style.display = '';
+            visibleRows++;
+          } else {
+            row.style.display = 'none';
+            // Also hide the detail row if it's open
+            const poNumber = row.getAttribute('data-gr');
+            const detailRow = document.querySelector(`.po-detail[data-gr="${poNumber}"]`);
+            if (detailRow) detailRow.style.display = 'none';
+          }
+        });
+        
+        // Show no results message if no rows match filters
+        if (visibleRows === 0) {
+          noResults.style.display = '';
+        } else {
+          noResults.style.display = 'none';
+        }
+      }
+      
+      // Initialize filters
+      applyFilters();
+      
+      // Pagination click handlers
+      document.querySelectorAll('.page-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          if (e.target.textContent === '»') {
+            alert('Loading next page...');
+          } else if (e.target.textContent === '«') {
+            alert('Loading previous page...');
+          } else {
+            document.querySelectorAll('.page-item').forEach(i => {
+              i.classList.remove('active');
+            });
+            e.target.classList.add('active');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
